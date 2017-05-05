@@ -83,24 +83,52 @@ var GameProcessor = function () {
     function GameProcessor(params) {
         _classCallCheck(this, GameProcessor);
 
-        this.cells = new Cells(params.cells || params);
+        this.cells = new Cells(params);
     }
 
     _createClass(GameProcessor, [{
+        key: 'shouldBeAlive',
+        value: function shouldBeAlive(aliveNeighboursCount) {
+            if (aliveNeighboursCount >= 4) {
+                return 0;
+            } else if (aliveNeighboursCount >= 2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }, {
         key: 'nextGenerationCellState',
-        value: function nextGenerationCellState(x, y) {}
+        value: function nextGenerationCellState(x, y) {
+            var _this = this;
+
+            var states = this.cells.directions.map(function (direction) {
+                return _this.cells.getNeighbourState(x, y, direction);
+            });
+            var aliveCount = states.filter(function (state) {
+                return state === 1;
+            }).length;
+
+            return this.shouldBeAlive(aliveCount);
+        }
     }, {
         key: 'nextStep',
         value: function nextStep() {
-            var neighbours;
+            var nextGenerationCells = [];
 
-            for (var y = 0; y < config.width; y++) {
-                for (var x = 0; x < config.height; x++) {
-                    neighbours = [];
+            for (var y = 0; y < this.cells.height; y++) {
+                if (nextGenerationCells[y] === undefined) {
+                    nextGenerationCells[y] = [];
+                }
+
+                for (var x = 0; x < this.cells.width; x++) {
+                    nextGenerationCells[y][x] = this.nextGenerationCellState(x, y);
                 }
             }
 
-            console.log(neighbours);
+            this.cells = new Cells(nextGenerationCells);
+
+            return this;
         }
     }, {
         key: 'width',
@@ -111,6 +139,11 @@ var GameProcessor = function () {
         key: 'height',
         get: function get() {
             return this.cells.height;
+        }
+    }, {
+        key: 'matrix',
+        get: function get() {
+            return this.cells.cells;
         }
     }]);
 
@@ -218,13 +251,16 @@ var Cells = function () {
     }, {
         key: 'getCellState',
         value: function getCellState(x, y) {
-            if (x < 0 || y < 0) {
-                return this.DEAD_STATE;
-            } else if (x > this.width - 1 || y > this.height - 1) {
+            if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
                 return this.DEAD_STATE;
             } else {
                 return this.cells[y][x];
             }
+        }
+    }, {
+        key: 'directions',
+        get: function get() {
+            return ['top', 'topRight', 'right', 'bottomRight', 'bottom', 'bottomLeft', 'left', 'topLeft'];
         }
     }], [{
         key: 'spawnRandomCells',

@@ -10,6 +10,14 @@ class Cells {
         }
     }
 
+    get directions() {
+        return [
+            'top', 'topRight', 'right',
+            'bottomRight', 'bottom', 'bottomLeft',
+            'left', 'topLeft'
+        ];
+    }
+
     spawnCells(input) {
         if (Array.isArray(input)) {
             this.cells = input;
@@ -65,9 +73,7 @@ class Cells {
     };
 
     getCellState(x, y) {
-        if (x < 0 || y < 0) {
-            return this.DEAD_STATE;
-        } else if (x > this.width - 1 || y > this.height - 1) {
+        if (x < 0 || y < 0 || x > this.width - 1 || y > this.height - 1) {
             return this.DEAD_STATE;
         } else {
             return this.cells[y][x];

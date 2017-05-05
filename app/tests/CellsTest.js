@@ -85,4 +85,10 @@ describe('Cells API:', () => {
             );
         });
     });
+
+    describe('List of directions', () => {
+        it('should return a list of directions', () => {
+            assert.typeOf(cells.directions, 'array');
+        });
+    });
 });
