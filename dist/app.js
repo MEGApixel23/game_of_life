@@ -83,18 +83,23 @@ var Display = function () {
     function Display(_ref) {
         var width = _ref.width,
             height = _ref.height,
-            canvas = _ref.canvas;
+            canvas = _ref.canvas,
+            cellSize = _ref.cellSize,
+            borderWidth = _ref.borderWidth,
+            strokeColor = _ref.strokeColor,
+            deadCellColor = _ref.deadCellColor,
+            aliveCellColor = _ref.aliveCellColor;
 
         _classCallCheck(this, Display);
 
         this.processor = new GameProcessor({ width: width, height: height });
         this.canvas = canvas;
         this.config = {
-            cellSize: 4,
-            borderWidth: 0.5,
-            strokeColor: '#c5fdf3',
-            deadCellColor: 'white',
-            aliveCellColor: '#0bfd94'
+            cellSize: cellSize || 5,
+            borderWidth: borderWidth || 0.5,
+            strokeColor: strokeColor || '#c5fdf3',
+            deadCellColor: deadCellColor || 'white',
+            aliveCellColor: aliveCellColor || '#0bfd94'
         };
 
         this.canvas.width = this.config.cellSize * this.processor.width;
@@ -109,11 +114,12 @@ var Display = function () {
             var _this = this;
             var drawGrid = function drawGrid() {
                 var context = _this2.canvas.getContext('2d');
-                var diff = _this2.processor.diff;
 
                 if (_this2.isPaused) {
                     return false;
                 }
+
+                _this2.processor.nextStep();
 
                 for (var row = 0; row < _this2.height; row++) {
                     for (var column = 0; column < _this2.width; column++) {
@@ -122,7 +128,6 @@ var Display = function () {
                 }
 
                 context.closePath();
-                _this2.processor.nextStep();
 
                 return true;
             };
@@ -157,11 +162,45 @@ var Display = function () {
             this.resume();
         }
     }, {
+        key: 'getCellAddressByOffsets',
+        value: function getCellAddressByOffsets(_ref2) {
+            var offsetX = _ref2.offsetX,
+                offsetY = _ref2.offsetY;
+
+            return {
+                x: Math.floor(offsetX / this.config.cellSize),
+                y: Math.floor(offsetY / this.config.cellSize)
+            };
+        }
+    }, {
+        key: 'getCellState',
+        value: function getCellState(_ref3) {
+            var x = _ref3.x,
+                y = _ref3.y;
+
+            return this.processor.matrix[y][x];
+        }
+    }, {
+        key: 'setCellState',
+        value: function setCellState(_ref4) {
+            var x = _ref4.x,
+                y = _ref4.y,
+                state = _ref4.state;
+
+            this.processor.matrix[y][x] = parseInt(state);
+
+            return this.drawCell({
+                context: this.canvas.getContext('2d'),
+                column: x,
+                row: y
+            });
+        }
+    }, {
         key: 'drawCell',
-        value: function drawCell(_ref2) {
-            var context = _ref2.context,
-                column = _ref2.column,
-                row = _ref2.row;
+        value: function drawCell(_ref5) {
+            var context = _ref5.context,
+                column = _ref5.column,
+                row = _ref5.row;
 
             var x = column * this.config.cellSize;
             var y = row * this.config.cellSize;
@@ -250,10 +289,12 @@ var Display = __webpack_require__(0);
 
 document.addEventListener('DOMContentLoaded', function () {
     var refreshTime = 1000;
+    var canvas = document.getElementById('canvas');
     var display = new Display({
+        canvas: canvas,
         width: 200,
         height: 200,
-        canvas: document.getElementById('canvas')
+        cellSize: 5
     }).setGenerationRefreshTime(refreshTime).render();
 
     document.getElementById('pause').addEventListener('click', function (e) {
@@ -277,13 +318,30 @@ document.addEventListener('DOMContentLoaded', function () {
         pauseButton.innerHTML = pauseButton.getAttribute('data-ongoing-text');
     });
 
+    canvas.addEventListener('click', function (e) {
+        var address = display.getCellAddressByOffsets({
+            offsetX: e.offsetX,
+            offsetY: e.offsetY
+        });
+        var oppositeState = display.getCellState(address) === 1 ? 0 : 1;
+
+        display.setCellState({
+            x: address.x,
+            y: address.y,
+            state: oppositeState
+        });
+    });
+
     var speedControlElements = document.getElementsByClassName('speed-control');
     for (var i = 0; i < speedControlElements.length; i++) {
         speedControlElements[i].addEventListener('click', function (e) {
             var speedFactor = parseInt(e.target.getAttribute('data-speed-factor'));
             var newRefreshTime = Math.floor(refreshTime / speedFactor);
+            var pauseButton = document.getElementById('pause');
 
             display.pause().setGenerationRefreshTime(newRefreshTime).resume();
+
+            pauseButton.innerHTML = pauseButton.getAttribute('data-ongoing-text');
         });
     }
 });
@@ -521,7 +579,7 @@ exports = module.exports = __webpack_require__(6)(undefined);
 
 
 // module
-exports.push([module.i, "canvas {\n    /*background-color: #fff;*/\n    /*background-image:*/\n        /*-webkit-linear-gradient(red 1px, transparent 1px),*/\n        /*-webkit-linear-gradient(0deg, #999 1px, transparent 1px);*/\n\n    /*background-image: linear-gradient(red 1px, transparent 1px),*/\n    /*linear-gradient(90deg, #999 1px, transparent 1px);*/\n    /*background-size: 10px 10px, 10px 10px;*/\n\n    /*border: 1px solid #999;*/\n    /*border-width: 0 1px 1px 0; !* right and bottom *!*/\n}", ""]);
+exports.push([module.i, "canvas {\n    cursor: pointer;\n}", ""]);
 
 // exports
 

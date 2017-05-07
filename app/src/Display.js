@@ -1,15 +1,15 @@
 const GameProcessor = require('./../src/GameProcessor');
 
 class Display {
-    constructor({width, height, canvas}) {
+    constructor({width, height, canvas, cellSize, borderWidth, strokeColor, deadCellColor, aliveCellColor}) {
         this.processor = new GameProcessor({width, height});
         this.canvas = canvas;
         this.config = {
-            cellSize: 4,
-            borderWidth: 0.5,
-            strokeColor: '#c5fdf3',
-            deadCellColor: 'white',
-            aliveCellColor: '#0bfd94',
+            cellSize: cellSize || 5,
+            borderWidth: borderWidth || 0.5,
+            strokeColor: strokeColor || '#c5fdf3',
+            deadCellColor: deadCellColor || 'white',
+            aliveCellColor: aliveCellColor || '#0bfd94',
         };
 
         this.canvas.width = this.config.cellSize * this.processor.width;
@@ -32,11 +32,12 @@ class Display {
         const _this = this;
         const drawGrid = () => {
             const context = this.canvas.getContext('2d');
-            const diff = this.processor.diff;
 
             if (this.isPaused) {
                 return false;
             }
+
+            this.processor.nextStep();
 
             for (let row = 0; row < this.height; row++) {
                 for (let column = 0; column < this.width; column++) {
@@ -45,7 +46,6 @@ class Display {
             }
 
             context.closePath();
-            this.processor.nextStep();
 
             return true;
         };
@@ -76,6 +76,27 @@ class Display {
             height: this.height
         });
         this.resume();
+    }
+
+    getCellAddressByOffsets({offsetX, offsetY}) {
+        return {
+            x: Math.floor(offsetX / this.config.cellSize),
+            y: Math.floor(offsetY / this.config.cellSize)
+        };
+    }
+
+    getCellState({x, y}) {
+        return this.processor.matrix[y][x];
+    }
+
+    setCellState({x, y, state}) {
+        this.processor.matrix[y][x] = parseInt(state);
+
+        return this.drawCell({
+            context: this.canvas.getContext('2d'),
+            column: x,
+            row: y
+        })
     }
 
     drawCell({context, column, row}) {
