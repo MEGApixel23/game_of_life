@@ -28,6 +28,18 @@ class Display {
         return !this.refreshInterval;
     }
 
+    initialRender() {
+        const context = this.canvas.getContext('2d');
+
+        for (let row = 0; row < this.height; row++) {
+            for (let column = 0; column < this.width; column++) {
+                this.drawCell({context, column, row});
+            }
+        }
+
+        return this;
+    }
+
     render() {
         const _this = this;
         const drawGrid = () => {
@@ -41,11 +53,7 @@ class Display {
 
             // Initial rendering
             if (this.processor.diff === null) {
-                for (let row = 0; row < this.height; row++) {
-                    for (let column = 0; column < this.width; column++) {
-                        this.drawCell({context, column, row});
-                    }
-                }
+                this.initialRender();
             } else {
                 this.processor.diff.map(({x, y}) => {
                     this.drawCell({context, column: x, row: y});
@@ -82,7 +90,7 @@ class Display {
             width: this.width,
             height: this.height
         });
-        this.resume();
+        this.initialRender().resume();
     }
 
     getCellAddressByOffsets({offsetX, offsetY}) {

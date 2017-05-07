@@ -107,6 +107,19 @@ var Display = function () {
     }
 
     _createClass(Display, [{
+        key: 'initialRender',
+        value: function initialRender() {
+            var context = this.canvas.getContext('2d');
+
+            for (var row = 0; row < this.height; row++) {
+                for (var column = 0; column < this.width; column++) {
+                    this.drawCell({ context: context, column: column, row: row });
+                }
+            }
+
+            return this;
+        }
+    }, {
         key: 'render',
         value: function render() {
             var _this2 = this;
@@ -123,11 +136,7 @@ var Display = function () {
 
                 // Initial rendering
                 if (_this2.processor.diff === null) {
-                    for (var row = 0; row < _this2.height; row++) {
-                        for (var column = 0; column < _this2.width; column++) {
-                            _this2.drawCell({ context: context, column: column, row: row });
-                        }
-                    }
+                    _this2.initialRender();
                 } else {
                     _this2.processor.diff.map(function (_ref2) {
                         var x = _ref2.x,
@@ -169,7 +178,7 @@ var Display = function () {
                 width: this.width,
                 height: this.height
             });
-            this.resume();
+            this.initialRender().resume();
         }
     }, {
         key: 'getCellAddressByOffsets',
