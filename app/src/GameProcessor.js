@@ -17,7 +17,11 @@ class GameProcessor {
         return this.cells.cells;
     }
 
-    shouldBeAlive(aliveNeighboursCount) {
+    shouldBeAlive(currentState, aliveNeighboursCount) {
+        if (currentState === 0) {
+            return aliveNeighboursCount === 3 ? 1 : 0;
+        }
+
         if (aliveNeighboursCount >= 4) {
             return 0;
         } else if (aliveNeighboursCount >= 2) {
@@ -32,8 +36,9 @@ class GameProcessor {
             this.cells.getNeighbourState(x, y, direction)
         ));
         const aliveCount = states.filter((state) => (state === 1)).length;
+        const currentCellState = this.matrix[y][x];
 
-        return this.shouldBeAlive(aliveCount);
+        return this.shouldBeAlive(currentCellState, aliveCount);
     }
 
     nextStep() {
