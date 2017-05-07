@@ -95,8 +95,8 @@ var Display = function () {
         this.processor = new GameProcessor({ width: width, height: height });
         this.canvas = canvas;
         this.config = {
-            cellSize: cellSize || 5,
-            borderWidth: borderWidth || 0.5,
+            cellSize: cellSize || 10,
+            borderWidth: borderWidth || 1,
             strokeColor: strokeColor || '#c5fdf3',
             deadCellColor: deadCellColor || 'white',
             aliveCellColor: aliveCellColor || '#0bfd94'
@@ -121,10 +121,20 @@ var Display = function () {
 
                 _this2.processor.nextStep();
 
-                for (var row = 0; row < _this2.height; row++) {
-                    for (var column = 0; column < _this2.width; column++) {
-                        _this2.drawCell({ context: context, column: column, row: row });
+                // Initial rendering
+                if (_this2.processor.diff === null) {
+                    for (var row = 0; row < _this2.height; row++) {
+                        for (var column = 0; column < _this2.width; column++) {
+                            _this2.drawCell({ context: context, column: column, row: row });
+                        }
                     }
+                } else {
+                    _this2.processor.diff.map(function (_ref2) {
+                        var x = _ref2.x,
+                            y = _ref2.y;
+
+                        _this2.drawCell({ context: context, column: x, row: y });
+                    });
                 }
 
                 context.closePath();
@@ -163,9 +173,9 @@ var Display = function () {
         }
     }, {
         key: 'getCellAddressByOffsets',
-        value: function getCellAddressByOffsets(_ref2) {
-            var offsetX = _ref2.offsetX,
-                offsetY = _ref2.offsetY;
+        value: function getCellAddressByOffsets(_ref3) {
+            var offsetX = _ref3.offsetX,
+                offsetY = _ref3.offsetY;
 
             return {
                 x: Math.floor(offsetX / this.config.cellSize),
@@ -174,18 +184,18 @@ var Display = function () {
         }
     }, {
         key: 'getCellState',
-        value: function getCellState(_ref3) {
-            var x = _ref3.x,
-                y = _ref3.y;
+        value: function getCellState(_ref4) {
+            var x = _ref4.x,
+                y = _ref4.y;
 
             return this.processor.matrix[y][x];
         }
     }, {
         key: 'setCellState',
-        value: function setCellState(_ref4) {
-            var x = _ref4.x,
-                y = _ref4.y,
-                state = _ref4.state;
+        value: function setCellState(_ref5) {
+            var x = _ref5.x,
+                y = _ref5.y,
+                state = _ref5.state;
 
             this.processor.matrix[y][x] = parseInt(state);
 
@@ -197,10 +207,10 @@ var Display = function () {
         }
     }, {
         key: 'drawCell',
-        value: function drawCell(_ref5) {
-            var context = _ref5.context,
-                column = _ref5.column,
-                row = _ref5.row;
+        value: function drawCell(_ref6) {
+            var context = _ref6.context,
+                column = _ref6.column,
+                row = _ref6.row;
 
             var x = column * this.config.cellSize;
             var y = row * this.config.cellSize;
@@ -294,7 +304,8 @@ document.addEventListener('DOMContentLoaded', function () {
         canvas: canvas,
         width: 200,
         height: 200,
-        cellSize: 5
+        cellSize: 10,
+        borderWidth: 1
     }).setGenerationRefreshTime(refreshTime).render();
 
     document.getElementById('pause').addEventListener('click', function (e) {
@@ -487,7 +498,7 @@ var GameProcessor = function () {
         _classCallCheck(this, GameProcessor);
 
         this.cells = new Cells(params);
-        this.diff = [];
+        this.diff = null;
     }
 
     _createClass(GameProcessor, [{

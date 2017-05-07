@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas,
         width: 200,
         height: 200,
-        cellSize: 5
+        cellSize: 10,
+        borderWidth: 1
     }).setGenerationRefreshTime(refreshTime)
         .render();
 

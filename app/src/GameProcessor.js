@@ -3,7 +3,7 @@ const Cells = require('./Cells');
 class GameProcessor {
     constructor(params) {
         this.cells = new Cells(params);
-        this.diff = [];
+        this.diff = null;
     }
 
     get width() {

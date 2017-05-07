@@ -5,8 +5,8 @@ class Display {
         this.processor = new GameProcessor({width, height});
         this.canvas = canvas;
         this.config = {
-            cellSize: cellSize || 5,
-            borderWidth: borderWidth || 0.5,
+            cellSize: cellSize || 10,
+            borderWidth: borderWidth || 1,
             strokeColor: strokeColor || '#c5fdf3',
             deadCellColor: deadCellColor || 'white',
             aliveCellColor: aliveCellColor || '#0bfd94',
@@ -39,10 +39,17 @@ class Display {
 
             this.processor.nextStep();
 
-            for (let row = 0; row < this.height; row++) {
-                for (let column = 0; column < this.width; column++) {
-                    this.drawCell({context, column, row});
+            // Initial rendering
+            if (this.processor.diff === null) {
+                for (let row = 0; row < this.height; row++) {
+                    for (let column = 0; column < this.width; column++) {
+                        this.drawCell({context, column, row});
+                    }
                 }
+            } else {
+                this.processor.diff.map(({x, y}) => {
+                    this.drawCell({context, column: x, row: y});
+                });
             }
 
             context.closePath();
