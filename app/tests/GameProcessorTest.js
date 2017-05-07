@@ -120,5 +120,26 @@ describe('GameProcessor API:', () => {
                 nextGenerationMatrix
             );
         });
+
+        it('should generate object with addresses of cells which changed states', () => {
+            const matrix = [
+                [0, 0, 1, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0]
+            ];
+            const expectedDiff = [
+                {x: 1, y: 0},
+                {x: 1, y: 1},
+                {x: 2, y: 1},
+                {x: 3, y: 1}
+            ];
+            const processor = new GameProcessor(matrix);
+            const diff = processor.nextStep().diff;
+
+            assert.deepEqual(
+                diff,
+                expectedDiff
+            );
+        });
     });
 });

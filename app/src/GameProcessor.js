@@ -3,6 +3,7 @@ const Cells = require('./Cells');
 class GameProcessor {
     constructor(params) {
         this.cells = new Cells(params);
+        this.diff = [];
     }
 
     get width() {
@@ -43,6 +44,7 @@ class GameProcessor {
 
     nextStep() {
         const nextGenerationCells = [];
+        const diff = [];
 
         for (let y = 0; y < this.cells.height; y++) {
             if (nextGenerationCells[y] === undefined) {
@@ -50,10 +52,18 @@ class GameProcessor {
             }
 
             for (let x = 0; x < this.cells.width; x++) {
-                nextGenerationCells[y][x] = this.nextGenerationCellState(x, y);
+                let currentState = this.cells.cells[y][x];
+                let nextState = this.nextGenerationCellState(x, y);
+
+                if (currentState !== nextState) {
+                    diff.push({x, y});
+                }
+
+                nextGenerationCells[y][x] = nextState;
             }
         }
 
+        this.diff = diff;
         this.cells = new Cells(nextGenerationCells);
 
         return this;

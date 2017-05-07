@@ -4,9 +4,16 @@ class Display {
     constructor({width, height, canvas}) {
         this.processor = new GameProcessor({width, height});
         this.canvas = canvas;
-        this.cellSize = 4;
-        this.canvas.width = this.cellSize * this.processor.width;
-        this.canvas.height = this.cellSize * this.processor.height;
+        this.config = {
+            cellSize: 4,
+            borderWidth: 0.5,
+            strokeColor: '#c5fdf3',
+            deadCellColor: 'white',
+            aliveCellColor: '#0bfd94',
+        };
+
+        this.canvas.width = this.config.cellSize * this.processor.width;
+        this.canvas.height = this.config.cellSize * this.processor.height;
     }
 
     get width() {
@@ -22,8 +29,10 @@ class Display {
     }
 
     render() {
-        const closure = () => {
+        const _this = this;
+        const drawGrid = () => {
             const context = this.canvas.getContext('2d');
+            const diff = this.processor.diff;
 
             if (this.isPaused) {
                 return false;
@@ -36,13 +45,15 @@ class Display {
             }
 
             context.closePath();
+            this.processor.nextStep();
 
             return true;
         };
 
-        this.refreshInterval = setInterval(() => {
-            closure() && this.processor.nextStep();
-        }, this.generationRefreshTime);
+        this.refreshInterval = setInterval(
+            () => (drawGrid.call(_this)),
+            this.generationRefreshTime
+        );
 
         return this;
     }
@@ -58,16 +69,26 @@ class Display {
         return this.render();
     }
 
+    restart() {
+        this.pause();
+        this.processor = new GameProcessor({
+            width: this.width,
+            height: this.height
+        });
+        this.resume();
+    }
+
     drawCell({context, column, row}) {
-        const x = column * this.cellSize;
-        const y = row * this.cellSize;
+        const x = column * this.config.cellSize;
+        const y = row * this.config.cellSize;
 
         context.beginPath();
-        context.lineWidth = 0.5;
-        context.strokeStyle = '#9ffd8e';
+        context.lineWidth = this.config.borderWidth;
+        context.strokeStyle = this.config.strokeColor;
 
-        context.rect(x, y, this.cellSize, this.cellSize);
-        context.fillStyle = this.processor.matrix[row][column] === 1 ? 'black' : 'white';
+        context.rect(x, y, this.config.cellSize, this.config.cellSize);
+        context.fillStyle = this.processor.matrix[row][column] === 1 ?
+            this.config.aliveCellColor : this.config.deadCellColor;
         context.fill();
         context.stroke();
 

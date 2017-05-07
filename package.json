@@ -6,7 +6,6 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha app/tests --reporter spec"
   },
-  "author": "Ihor Omelchenko <megapixel23@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "chai": "^3.5.0",

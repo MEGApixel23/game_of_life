@@ -9,7 +9,7 @@ describe('Display API:', () => {
             const width = 200;
             const height = 200;
             const display = new Display({
-                width, height, canvas: 'canvas'
+                width, height, canvas: {width: 0, height: 0}
             });
 
             assert.deepEqual(

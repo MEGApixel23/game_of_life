@@ -24,4 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 element.innerHTML = pausedText;
             }
         });
+
+    document.getElementById('restart')
+        .addEventListener('click', () => {
+            const pauseButton = document.getElementById('pause');
+
+            display.restart();
+            pauseButton.innerHTML = pauseButton.getAttribute('data-ongoing-text');
+        });
 });

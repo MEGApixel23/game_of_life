@@ -89,36 +89,46 @@ var Display = function () {
 
         this.processor = new GameProcessor({ width: width, height: height });
         this.canvas = canvas;
-        this.cellSize = 4;
-        this.canvas.width = this.cellSize * this.processor.width;
-        this.canvas.height = this.cellSize * this.processor.height;
+        this.config = {
+            cellSize: 4,
+            borderWidth: 0.5,
+            strokeColor: '#c5fdf3',
+            deadCellColor: 'white',
+            aliveCellColor: '#0bfd94'
+        };
+
+        this.canvas.width = this.config.cellSize * this.processor.width;
+        this.canvas.height = this.config.cellSize * this.processor.height;
     }
 
     _createClass(Display, [{
         key: 'render',
         value: function render() {
+            var _this2 = this;
+
             var _this = this;
+            var drawGrid = function drawGrid() {
+                var context = _this2.canvas.getContext('2d');
+                var diff = _this2.processor.diff;
 
-            var closure = function closure() {
-                var context = _this.canvas.getContext('2d');
-
-                if (_this.isPaused) {
+                if (_this2.isPaused) {
                     return false;
                 }
 
-                for (var row = 0; row < _this.height; row++) {
-                    for (var column = 0; column < _this.width; column++) {
-                        _this.drawCell({ context: context, column: column, row: row });
+                for (var row = 0; row < _this2.height; row++) {
+                    for (var column = 0; column < _this2.width; column++) {
+                        _this2.drawCell({ context: context, column: column, row: row });
                     }
                 }
 
                 context.closePath();
+                _this2.processor.nextStep();
 
                 return true;
             };
 
             this.refreshInterval = setInterval(function () {
-                closure() && _this.processor.nextStep();
+                return drawGrid.call(_this);
             }, this.generationRefreshTime);
 
             return this;
@@ -137,21 +147,31 @@ var Display = function () {
             return this.render();
         }
     }, {
+        key: 'restart',
+        value: function restart() {
+            this.pause();
+            this.processor = new GameProcessor({
+                width: this.width,
+                height: this.height
+            });
+            this.resume();
+        }
+    }, {
         key: 'drawCell',
         value: function drawCell(_ref2) {
             var context = _ref2.context,
                 column = _ref2.column,
                 row = _ref2.row;
 
-            var x = column * this.cellSize;
-            var y = row * this.cellSize;
+            var x = column * this.config.cellSize;
+            var y = row * this.config.cellSize;
 
             context.beginPath();
-            context.lineWidth = 0.5;
-            context.strokeStyle = '#9ffd8e';
+            context.lineWidth = this.config.borderWidth;
+            context.strokeStyle = this.config.strokeColor;
 
-            context.rect(x, y, this.cellSize, this.cellSize);
-            context.fillStyle = this.processor.matrix[row][column] === 1 ? 'black' : 'white';
+            context.rect(x, y, this.config.cellSize, this.config.cellSize);
+            context.fillStyle = this.processor.matrix[row][column] === 1 ? this.config.aliveCellColor : this.config.deadCellColor;
             context.fill();
             context.stroke();
 
@@ -247,6 +267,13 @@ document.addEventListener('DOMContentLoaded', function () {
             display.pause();
             element.innerHTML = pausedText;
         }
+    });
+
+    document.getElementById('restart').addEventListener('click', function () {
+        var pauseButton = document.getElementById('pause');
+
+        display.restart();
+        pauseButton.innerHTML = pauseButton.getAttribute('data-ongoing-text');
     });
 });
 
@@ -391,6 +418,7 @@ var GameProcessor = function () {
         _classCallCheck(this, GameProcessor);
 
         this.cells = new Cells(params);
+        this.diff = [];
     }
 
     _createClass(GameProcessor, [{
@@ -427,6 +455,7 @@ var GameProcessor = function () {
         key: 'nextStep',
         value: function nextStep() {
             var nextGenerationCells = [];
+            var diff = [];
 
             for (var y = 0; y < this.cells.height; y++) {
                 if (nextGenerationCells[y] === undefined) {
@@ -434,10 +463,18 @@ var GameProcessor = function () {
                 }
 
                 for (var x = 0; x < this.cells.width; x++) {
-                    nextGenerationCells[y][x] = this.nextGenerationCellState(x, y);
+                    var currentState = this.cells.cells[y][x];
+                    var nextState = this.nextGenerationCellState(x, y);
+
+                    if (currentState !== nextState) {
+                        diff.push({ x: x, y: y });
+                    }
+
+                    nextGenerationCells[y][x] = nextState;
                 }
             }
 
+            this.diff = diff;
             this.cells = new Cells(nextGenerationCells);
 
             return this;
