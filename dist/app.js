@@ -249,11 +249,12 @@ __webpack_require__(1);
 var Display = __webpack_require__(0);
 
 document.addEventListener('DOMContentLoaded', function () {
+    var refreshTime = 1000;
     var display = new Display({
         width: 200,
         height: 200,
         canvas: document.getElementById('canvas')
-    }).setGenerationRefreshTime(500).render();
+    }).setGenerationRefreshTime(refreshTime).render();
 
     document.getElementById('pause').addEventListener('click', function (e) {
         var element = e.target;
@@ -275,6 +276,16 @@ document.addEventListener('DOMContentLoaded', function () {
         display.restart();
         pauseButton.innerHTML = pauseButton.getAttribute('data-ongoing-text');
     });
+
+    var speedControlElements = document.getElementsByClassName('speed-control');
+    for (var i = 0; i < speedControlElements.length; i++) {
+        speedControlElements[i].addEventListener('click', function (e) {
+            var speedFactor = parseInt(e.target.getAttribute('data-speed-factor'));
+            var newRefreshTime = Math.floor(refreshTime / speedFactor);
+
+            display.pause().setGenerationRefreshTime(newRefreshTime).resume();
+        });
+    }
 });
 
 /***/ }),
