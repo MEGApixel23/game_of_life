@@ -2,21 +2,18 @@
   "name": "game_of_life",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app/app.js",
   "scripts": {
     "test": "./node_modules/.bin/mocha app/tests --reporter spec"
   },
   "license": "ISC",
-  "dependencies": {
-    "chai": "^3.5.0",
-    "mocha": "^3.3.0"
-  },
   "devDependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
     "babel-preset-env": "^1.4.0",
-    "css-loader": "^0.28.1",
-    "style-loader": "^0.17.0",
+    "chai": "^3.5.0",
+    "copy-webpack-plugin": "^4.0.1",
+    "mocha": "^3.3.0",
     "webpack": "^2.5.0"
   }
 }

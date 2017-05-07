@@ -1,3 +1,5 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 module.exports = {
     context: __dirname + '/app',
     entry: './app',
@@ -16,10 +18,12 @@ module.exports = {
                         presets: ['env']
                     }
                 }
-            }, {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
             }
         ]
-    }
+    },
+    plugins: [
+        new CopyWebpackPlugin([
+            { from: 'static' }
+        ])
+    ]
 };

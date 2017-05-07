@@ -1,5 +1,3 @@
-require('./static/style.css');
-
 const Display = require('./src/Display');
 
 document.addEventListener('DOMContentLoaded', () => {
